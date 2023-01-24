@@ -64,7 +64,31 @@ class Player {
   }
 }
 
+class Projectile {
+  constructor({ position, velocity }) {
+    this.position = position;
+    this.velocity = velocity;
+
+    this.radius = 3;
+  }
+
+  draw() {
+    c.beginPath();
+    c.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2, true);
+    c.fillStyle = "red";
+    c.fill();
+    c.closePath();
+  }
+
+  update() {
+    this.draw();
+    this.position.x += this.velocity.x;
+    this.position.y += this.velocity.y;
+  }
+}
+
 const player = new Player();
+const projectiles = [];
 const keys = {
   a: {
     pressed: false,
@@ -80,8 +104,16 @@ const keys = {
 function animate() {
   requestAnimationFrame(animate);
   c.fillRect(0, 0, canvas.width, canvas.height);
+  projectiles.forEach((projectile, i) => {
+    if (projectile.position.y + projectile.radius <= 0) {
+      setTimeout(() => {
+        projectiles.splice(i, 1);
+      }, 0);
+    } else {
+      projectile.update();
+    }
+  });
   c.fillStyle = "black";
-
   player.update();
 
   if (keys.a.pressed && player.position.x >= 0) {
@@ -110,7 +142,18 @@ addEventListener("keydown", ({ key }) => {
       keys.d.pressed = true;
       break;
     case " ":
-      console.log("space");
+      projectiles.push(
+        new Projectile({
+          position: {
+            x: player.position.x + player.width / 2,
+            y: player.position.y,
+          },
+          velocity: {
+            x: 0,
+            y: -10,
+          },
+        })
+      );
       break;
   }
 });
@@ -124,7 +167,6 @@ addEventListener("keyup", ({ key }) => {
       keys.d.pressed = false;
       break;
     case " ":
-      console.log("space");
       break;
   }
 });
