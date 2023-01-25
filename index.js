@@ -1,4 +1,6 @@
 const canvas = document.querySelector("canvas");
+const playerScore = document.querySelector("#playerScore");
+
 const c = canvas.getContext("2d");
 
 canvas.width = window.innerWidth;
@@ -246,6 +248,7 @@ let game = {
   over: false,
   active: true,
 };
+let score = 0;
 
 const keys = {
   a: {
@@ -347,6 +350,8 @@ function animate() {
             );
 
             if (invaderFound && projectileFound) {
+              score += 100;
+              playerScore.innerHTML = score;
               createParticles({ object: invader, fades: true });
               grid.invaders.splice(i, 1);
               projectiles.splice(j, 1);
