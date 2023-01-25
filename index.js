@@ -193,7 +193,7 @@ let randomInterval = Math.floor(Math.random() * 500 + 500);
 function animate() {
   requestAnimationFrame(animate);
   c.fillRect(0, 0, canvas.width, canvas.height);
-  grids.forEach((grid) => {
+  grids.forEach((grid, gridIndex) => {
     grid.update();
     grid.invaders.forEach((invader, i) => {
       invader.update({ velocity: grid.velocity });
@@ -219,6 +219,19 @@ function animate() {
             if (invaderFound && projectileFound) {
               grid.invaders.splice(i, 1);
               projectiles.splice(j, 1);
+
+              if (grid.invaders.length > 0) {
+                const firstInvader = grid.invaders[0];
+                const lastInvader = grid.invaders[grid.invaders.length - 1];
+
+                grid.width =
+                  lastInvader.position.x -
+                  firstInvader.position.x +
+                  lastInvader.width;
+                grid.position.x = firstInvader.position.x;
+              }
+            } else {
+              grid.splice(gridIndex, 1);
             }
           }, 0);
         }
@@ -264,10 +277,10 @@ animate();
 
 addEventListener("keydown", ({ key }) => {
   switch (key) {
-    case "a":
+    case "ArrowLeft":
       keys.a.pressed = true;
       break;
-    case "d":
+    case "ArrowRight":
       keys.d.pressed = true;
       break;
     case " ":
@@ -289,10 +302,10 @@ addEventListener("keydown", ({ key }) => {
 
 addEventListener("keyup", ({ key }) => {
   switch (key) {
-    case "a":
+    case "ArrowLeft":
       keys.a.pressed = false;
       break;
-    case "d":
+    case "ArrowRight":
       keys.d.pressed = false;
       break;
     case " ":
