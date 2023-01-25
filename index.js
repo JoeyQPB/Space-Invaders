@@ -104,6 +104,21 @@ class Invader {
       this.position.y += velocity.y;
     }
   }
+
+  shoot(invaderProjectile) {
+    invaderProjectile.push(
+      new InvaderProjectile({
+        position: {
+          x: this.position.x + this.width / 2,
+          y: this.position.y + this.height,
+        },
+        velocity: {
+          x: 0,
+          y: 5,
+        },
+      })
+    );
+  }
 }
 
 class Grid {
@@ -172,9 +187,32 @@ class Projectile {
   }
 }
 
+class InvaderProjectile {
+  constructor({ position, velocity }) {
+    this.position = position;
+    this.velocity = velocity;
+
+    this.width = 4;
+    this.height = 10;
+  }
+
+  draw() {
+    c.fillStyle = "white";
+    c.fillRect(this.position.x, this.position.y, this.width, this.height);
+  }
+
+  update() {
+    this.draw();
+    this.position.x += this.velocity.x;
+    this.position.y += this.velocity.y;
+  }
+}
+
 const player = new Player();
 const projectiles = [];
 const grids = [];
+const invaderProjectiles = [];
+
 const keys = {
   a: {
     pressed: false,
@@ -195,6 +233,11 @@ function animate() {
   c.fillRect(0, 0, canvas.width, canvas.height);
   grids.forEach((grid, gridIndex) => {
     grid.update();
+    if (frames % 100 === 0 && grid.invaders.length > 0) {
+      grid.invaders[Math.floor(Math.random() * grid.invaders.length)].shoot(
+        invaderProjectiles
+      );
+    }
     grid.invaders.forEach((invader, i) => {
       invader.update({ velocity: grid.velocity });
 
@@ -238,6 +281,27 @@ function animate() {
       });
     });
   });
+  invaderProjectiles.forEach((invaderProjectile, index) => {
+    if (
+      invaderProjectile.position.y + invaderProjectile.height >=
+      canvas.height
+    ) {
+      setTimeout(() => {
+        invaderProjectiles.splice(index, 1);
+      }, 0);
+    } else invaderProjectile.update();
+
+    if (
+      invaderProjectile.position.y + invaderProjectile.height >=
+        player.position.y &&
+      invaderProjectile.position.x + invaderProjectile.width >=
+        player.position.x &&
+      invaderProjectile.position.x <= player.width + player.position.x
+    ) {
+      console.log("Game Over");
+    }
+  });
+
   projectiles.forEach((projectile, i) => {
     if (projectile.position.y + projectile.radius <= 0) {
       setTimeout(() => {
@@ -269,7 +333,6 @@ function animate() {
     frames = 0;
     randomInterval = Math.floor(Math.random() * 500 + 500);
   }
-
   frames++;
 }
 
