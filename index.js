@@ -12,6 +12,7 @@ class Player {
     };
 
     this.rotation = 0;
+    this.opacity = 1;
 
     const image = new Image();
     image.src = "./img/spaceship.png";
@@ -30,10 +31,8 @@ class Player {
   }
 
   draw() {
-    // c.fillStyle = "red";
-    // c.fillRect(this.position.x, this.position.y, this.width, this.height);
-
     c.save();
+    c.globalAlpha = this.opacity;
     c.translate(
       player.position.x + player.width / 2,
       player.position.y + player.height / 2
@@ -222,12 +221,12 @@ class InvaderProjectile {
     this.position = position;
     this.velocity = velocity;
 
-    this.width = 4;
-    this.height = 10;
+    this.width = 5;
+    this.height = 17;
   }
 
   draw() {
-    c.fillStyle = "white";
+    c.fillStyle = "blue";
     c.fillRect(this.position.x, this.position.y, this.width, this.height);
   }
 
@@ -243,6 +242,10 @@ const projectiles = [];
 const grids = [];
 const invaderProjectiles = [];
 const particles = [];
+let game = {
+  over: false,
+  active: true,
+};
 
 const keys = {
   a: {
@@ -299,6 +302,7 @@ function createParticles({ object, color, fades }) {
 }
 
 function animate() {
+  if (!game.active) return;
   requestAnimationFrame(animate);
   c.fillRect(0, 0, canvas.width, canvas.height);
   particles.forEach((particle, index) => {
@@ -383,10 +387,17 @@ function animate() {
         player.position.x &&
       invaderProjectile.position.x <= player.width + player.position.x
     ) {
+      console.log("Game Over");
+
       setTimeout(() => {
         invaderProjectiles.splice(index, 1);
+        player.opacity = 0;
+        game.over = true;
       }, 0);
-      console.log("Game Over");
+
+      setTimeout(() => {
+        game.active = false;
+      }, 2000);
       createParticles({ object: player, color: "yellow", fades: true });
     }
   });
@@ -428,6 +439,7 @@ function animate() {
 animate();
 
 addEventListener("keydown", ({ key }) => {
+  if (game.over) return;
   switch (key) {
     case "ArrowLeft":
       keys.a.pressed = true;
